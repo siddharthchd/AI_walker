@@ -21,9 +21,9 @@ class Human:
         self.shape = pymunk.Poly.create_box(None, (50, 100))
         body_moment = pymunk.moment_for_poly(moment, self.shape.get_vertices())
         self.body = pymunk.Body(moment, body_moment)
-        self.body = pymunk.Body(body_type = pymunk.Body.STATIC)
+        #self.body = pymunk.Body(body_type = pymunk.Body.STATIC)
 
-        self.body.position = (screen_width / 2, 500)
+        self.body.position = (screen_width / 2, 400)
         self.shape.body = self.body
         self.shape.color = (150, 150, 150, 0)
 
@@ -55,7 +55,7 @@ class Human:
         self.right_arm_motor = pymunk.SimpleMotor(self.body, self.right_arm_upper_body, 0)
 
         # thighs
-        thigh_size = (30, 60)
+        thigh_size = (20, 50)
 
         self.left_thigh_shape = pymunk.Poly.create_box(None, thigh_size)
         left_thigh_moment = pymunk.moment_for_poly(moment, self.left_thigh_shape.get_vertices())
@@ -69,14 +69,14 @@ class Human:
         self.right_thigh_shape = pymunk.Poly.create_box(None, thigh_size)
         right_thigh_moment = pymunk.moment_for_poly(moment, self.right_thigh_shape.get_vertices())
         self.right_thigh_body = pymunk.Body(moment, right_thigh_moment)
-        self.right_thigh_body.position = (self.body.position.x - 20, self.body.position.y - 50)
+        self.right_thigh_body.position = (self.body.position.x + 20, self.body.position.y - 50)
         self.right_thigh_shape.body = self.right_thigh_body
         self.right_thigh_shape.friction = friction
-        self.right_thigh_joint = pymunk.PivotJoint(self.right_thigh_body, self.body, (0, thigh_size[1] / 2), (-20, -50))
+        self.right_thigh_joint = pymunk.PivotJoint(self.right_thigh_body, self.body, (0, thigh_size[1] / 2), (20, -50))
         self.right_thigh_motor = pymunk.SimpleMotor(self.body, self.right_thigh_body, 0)
 
         # shin
-        shin_size = (20, 70)
+        shin_size = (20, 60)
 
         self.left_shin_shape = pymunk.Poly.create_box(None, shin_size)
         left_shin_moment = pymunk.moment_for_poly(moment, self.left_shin_shape.get_vertices())
@@ -114,7 +114,7 @@ class Human:
         self.right_shin_shape.filter = shape_filter
 
         self.face = pygame.image.load('angry_pepe_frog.png')
-        self.face = pygame.transform.scale(self.face, (100,100))
+        self.face = pygame.transform.scale(self.face, (90,90))
 
         self.is_done = False
         self.distance = 0
@@ -149,12 +149,12 @@ class Human:
     def draw_face(self, screen):
 
         rotated_face = rot_center(self.face, math.degrees(self.head_body.angle))
-        screen.blit(rotated_face, (self.head_body.position[0] - 50, screen_height - self.head_body.position[1] - 50))
+        screen.blit(rotated_face, (self.head_body.position[0] - 40, screen_height - self.head_body.position[1] - 50))
 
     def set_color(self, color, rest_color = (0, 0, 255)):
 
         self.shape.color = color
-        self.head_shape.color = color
+        self.head_shape.color = (255, 255, 255)
         self.left_thigh_shape.color = rest_color
         self.left_shin_shape.color = rest_color
         self.right_thigh_shape.color = rest_color
@@ -170,13 +170,13 @@ class Human:
 
 def add_land(space):
 
-    land_size = (screen_width -300, 20)
+    land_size = (screen_width + 300 , 10)
     shape = pymunk.Poly.create_box(None, land_size)
     shape.friction = 0.5
     shape.elasticity = 1.0
     moment = pymunk.moment_for_poly(1, shape.get_vertices())
     body = pymunk.Body(9999, moment, body_type = pymunk.Body.KINEMATIC)
-    body.position = (screen_width / 2 + 300, 300)
+    body.position = (screen_width/3, 150)
     shape.body = body
     space.add(body, shape)
 
@@ -205,21 +205,18 @@ def main():
     nets = []
     humans = []
     ticks_to_next = 10
+    human = Human()
+    humans.append(human)
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
 
-        ticks_to_next -= 1
-        if ticks_to_next <= 0:
-            ticks_to_next = 25
-            human = Human()
-            humans.append(human)
-
         space.step(1/50.0)
         screen.fill((255, 255, 255))
         space.debug_draw(draw_options)
+        #human.draw_face(screen)
         pygame.display.flip()
         clock.tick(50)
 
