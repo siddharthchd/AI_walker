@@ -9,7 +9,7 @@ import random
 screen_width = 900
 screen_height = 650
 space = pymunk.Space()
-space.gravity = (0.0, -100.0)
+space.gravity = (0.0, 0.0)
 generation = 0
 
 class Human:
@@ -17,7 +17,7 @@ class Human:
     def __init__(self):
 
         moment = 5
-        friction = 0.5
+        friction = 2
         self.shape = pymunk.Poly.create_box(None, (50, 100))
         body_moment = pymunk.moment_for_poly(moment, self.shape.get_vertices())
         self.body = pymunk.Body(moment, body_moment)
@@ -55,28 +55,28 @@ class Human:
         self.right_arm_motor = pymunk.SimpleMotor(self.body, self.right_arm_upper_body, 0)
 
         # thighs
-        thigh_size = (20, 50)
+        thigh_size = (13, 50)
 
         self.left_thigh_shape = pymunk.Poly.create_box(None, thigh_size)
         left_thigh_moment = pymunk.moment_for_poly(moment, self.left_thigh_shape.get_vertices())
         self.left_thigh_body = pymunk.Body(moment, left_thigh_moment)
-        self.left_thigh_body.position = (self.body.position.x - 20, self.body.position.y - 50)
+        self.left_thigh_body.position = (self.body.position.x - 10, self.body.position.y - 75)
         self.left_thigh_shape.body = self.left_thigh_body
         self.left_thigh_shape.friction = friction
-        self.left_thigh_joint = pymunk.PivotJoint(self.left_thigh_body, self.body, (0, thigh_size[1] / 2), (-20, -50))
+        self.left_thigh_joint = pymunk.PivotJoint(self.left_thigh_body, self.body, (0, thigh_size[1] / 2), (-10, -55))
         self.left_thigh_motor = pymunk.SimpleMotor(self.body, self.left_thigh_body, 0)
 
         self.right_thigh_shape = pymunk.Poly.create_box(None, thigh_size)
         right_thigh_moment = pymunk.moment_for_poly(moment, self.right_thigh_shape.get_vertices())
         self.right_thigh_body = pymunk.Body(moment, right_thigh_moment)
-        self.right_thigh_body.position = (self.body.position.x + 20, self.body.position.y - 50)
+        self.right_thigh_body.position = (self.body.position.x + 10, self.body.position.y - 75)
         self.right_thigh_shape.body = self.right_thigh_body
         self.right_thigh_shape.friction = friction
-        self.right_thigh_joint = pymunk.PivotJoint(self.right_thigh_body, self.body, (0, thigh_size[1] / 2), (20, -50))
+        self.right_thigh_joint = pymunk.PivotJoint(self.right_thigh_body, self.body, (0, thigh_size[1] / 2), (10, -55))
         self.right_thigh_motor = pymunk.SimpleMotor(self.body, self.right_thigh_body, 0)
 
         # shin
-        shin_size = (20, 60)
+        shin_size = (13, 50)
 
         self.left_shin_shape = pymunk.Poly.create_box(None, shin_size)
         left_shin_moment = pymunk.moment_for_poly(moment, self.left_shin_shape.get_vertices())
@@ -101,7 +101,7 @@ class Human:
         space.add(self.left_thigh_body, self.left_thigh_shape, self.left_thigh_joint, self.left_thigh_motor)
         space.add(self.right_thigh_body, self.right_thigh_shape, self.right_thigh_joint, self.right_thigh_motor)
         space.add(self.left_shin_body, self.left_shin_shape, self.left_shin_joint, self.left_shin_motor)
-        space.add(self.right_shin_body, self.right_shin_shape, self.right_shin_joint, self.right_shin_motor)
+        #space.add(self.right_shin_body, self.right_shin_shape, self.right_shin_joint, self.right_shin_motor)
 
         shape_filter = pymunk.ShapeFilter(group = 1)
         self.shape.filter = shape_filter
@@ -168,8 +168,57 @@ class Human:
         space.add(self.right_thigh_body, self.right_thigh_shape, self.right_thigh_joint, self.right_thigh_motor)
         space.add(self.right_shin_body, self.right_shin_shape, self.right_shin_joint, self.right_shin_motor)
 
-def add_land(space):
+    def update(self):
 
+        # left_thigh
+        self.left_thigh_flag = False
+        if (360 - math.degrees(self.left_thigh_body.angle)) - (360 - math.degrees(self.body.angle)) >= 90 and self.left_thigh_motor.rate > 0:
+            self.left_thigh_motor.rate = 0
+            self.left_thigh_flag = True
+        elif (360 - math.degrees(self.left_thigh_body.angle)) - (360 - math.degrees(self.body.angle)) <= -90 and self.left_thigh_motor.rate < 0:
+            self.left_thigh_motor.rate = 0
+            self.left_thigh_flag = True
+
+        # left_shin
+        self.left_shin_flag = False
+        if (360 - math.degrees(self.left_shin_body.angle)) - (360 - math.degrees(self.body.angle)) >= 90 and self.left_shin_motor.rate > 0:
+            self.left_shin_motor.rate = 0
+            self.left_shin_flag = True
+        elif (360 - math.degrees(self.left_shin_body.angle)) - (360 - math.degrees(self.body.angle)) <= -90 and self.left_shin_motor.rate < 0:
+            self.left_shin_motor.rate = 0
+            self.left_shin_flag = True
+
+        # right_thigh
+        self.right_thigh_flag = False
+        if (360 - math.degrees(self.right_thigh_body.angle)) - (360 - math.degrees(self.body.angle)) >= 90 and self.right_thigh_motor.rate > 0:
+            self.right_thigh_motor.rate = 0
+            self.right_thigh_flag = True
+        elif (360 - math.degrees(self.right_thigh_body.angle)) - (360 - math.degrees(self.body.angle)) <= -90 and self.right_thigh_motor.rate < 0:
+            self.right_thigh_motor.rate = 0
+            self.right_thigh_flag = True
+
+        # right_shin
+        self.right_shin_flag = False
+        if (360 - math.degrees(self.right_shin_body.angle)) - (360 - math.degrees(self.body.angle)) >= 90 and self.right_shin_motor.rate > 0:
+            self.right_shin_motor.rate = 0
+            self.right_shin_flag = True
+        elif (360 - math.degrees(self.right_shin_body.angle)) - (360 - math.degrees(self.body.angle)) <= -90 and self.eft_thigh_motor.rate < 0:
+            self.right_shin_motor.rate = 0
+            self.right_shin_flag = True
+
+    def set_position(self, x):
+
+        self.body._set_position((self.body.position.x - x), self.body.position.y)
+        self.head_body._set_position((self.head_body.position.x - x, self.head_body.position.y))
+
+        self.left_thigh_body._set_position((self.left_thigh_body.position.x - x, self.left_thigh_body.position.y))
+        self.right_thigh_body._set_position((self.right_thigh_body.position.x - x, self.right_thigh_body.position.y))
+        self.left_shin_body._set_position((self.left_shin_body.position.x - x, self.left_shin_body.position.y))
+        self.right_shin_body._set_position((self.right_shin_body.position.x - x, self.right_shin_body.position.y))
+
+
+def add_land(space):
+    """
     land_size = (screen_width + 300 , 10)
     shape = pymunk.Poly.create_box(None, land_size)
     shape.friction = 0.5
@@ -181,6 +230,14 @@ def add_land(space):
     space.add(body, shape)
 
     return shape
+    """
+
+    body = pymunk.Body(body_type = pymunk.Body.STATIC)
+    body.position = (0, 100)
+    land = pymunk.Segment(body, (0, 0), (2000, 0), 10)
+    land.friction = 0.5
+    land.elasticity = 0.1
+    space.add(land)
 
 def rot_center(image, angle):
 
@@ -192,7 +249,7 @@ def rot_center(image, angle):
 
     return rot_image
 
-def main():
+def walk():
 
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -200,6 +257,7 @@ def main():
     draw_options = pymunk.pygame_util.DrawOptions(screen)
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 20)
+    generation_font = pygame.font.SysFont("Arial", 70)
     land = add_land(space)
     ruler = 0
     nets = []
